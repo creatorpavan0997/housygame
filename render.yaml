@@ -1,0 +1,38 @@
+services:
+  # The web service running Daphne ASGI server for WebSocket support
+  - type: web
+    name: rabbithouse-game
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "daphne -b 0.0.0.0 -p $$PORT rabbithouse_project.asgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rabbithouse-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: rabbithouse-redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+
+# Managed PostgreSQL instance
+databases:
+  - name: rabbithouse-db
+    databaseName: rabbithouse_db
+    user: rabbithouse_user
+    plan: free
+
+# Managed Redis instance for Channels Layer
+redis:
+  - name: rabbithouse-redis
+    plan: free
+    ipAllowList: [] # Access restricted internally
