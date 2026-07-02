@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card glass-card p-4 p-md-5 animate-fade-in">
+            
+            <div class="text-center mb-4">
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-2 tracking-wider">Lobby Room</span>
+                <h1 class="text-white fw-bold mb-3">Room ID: <span class="text-warning text-glow" id="display-room-id">{{ room.room_id }}</span></h1>
+                
+                <!-- Share Actions -->
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="copyRoomId()">
+                        <i class="fa-regular fa-copy me-1"></i> Copy Code
+                    </button>
+                    <button class="btn btn-outline-info btn-sm rounded-pill px-3 text-white" id="share-btn" onclick="shareRoom()">
+                        <i class="fa-solid fa-share-nodes me-1"></i> Share Link
+                    </button>
+                </div>
+                <div class="small text-white-50">Share code or join link with up to 6 other players.</div>
+            </div>
+            
+            <hr class="border-light opacity-10 mb-4">
+            
+            <!-- Player List Panel -->
+            <div class="mb-4">
+                <h4 class="text-white fw-semibold mb-3 d-flex justify-content-between align-items-center">
+                    <span>Players Joined</span>
+                    <span class="badge bg-info rounded-pill" id="player-count-badge">0 / 7</span>
+                </h4>
+                
+                <div class="player-list-container d-flex flex-column gap-2" id="player-list">
+                    <!-- Real-time dynamic updates via WebSocket -->
+                    <div class="text-center py-4 text-white-50">
+                        <div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>
+                        Connecting to WebSocket...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions Section -->
+            <div class="text-center mt-5">
+                {% if is_host %}
+                    <button id="start-game-btn" class="btn btn-warning btn-lg w-100 py-3 rounded-pill fw-bold text-uppercase tracking-wider btn-glow disabled" onclick="startGame()">
+                        <i class="fa-solid fa-play me-2"></i> Start Game
+                    </button>
+                    <div class="small text-white-50 mt-2" id="host-msg">Need at least 2 players to start.</div>
+                {% else %}
+                    <div class="glass-alert alert alert-info mb-0 py-3 rounded-pill">
+                        <i class="fa-solid fa-hourglass-half fa-spin me-2 text-warning"></i> Waiting for host to start the game...
+                    </div>
+                {% endif %}
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const roomId = "{{ room.room_id }}";
+    const isHost = {% if is_host %}true{% else %}false{% endif %};
+    const joinLink = "{{ join_link }}";
+    let socket = null;
+    let reconnectAttempts = 0;
+
+    function copyRoomId() {
+        navigator.clipboard.writeText(roomId);
+        alert("Room ID copied to clipboard: " + roomId);
+    }
+
+    function shareRoom() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Join my RabbitHouse Room!',
+                text: 'Play RabbitHouse with me! Room ID: ' + roomId,
+                url: joinLink
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(joinLink);
+            alert("Join Link copied to clipboard: " + joinLink);
+        }
+    }
+
+    function connectWebSocket() {
+        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const wsUrl = `${wsScheme}://${window.location.host}/ws/room/${roomId}/`;
+        
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = function(e) {
+            console.log("WebSocket connected!");
+            reconnectAttempts = 0;
+        };
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log("Received message:", data);
+
+            if (data.type === 'player_list') {
+                updatePlayerList(data.players);
+            } else if (data.type === 'game_started') {
+                // Sound chime
+                AudioSynth.playSuccess();
+                // Redirect all room players to active game screen
+                window.location.href = `/game/${roomId}/`;
+            } else if (data.type === 'removed') {
+                alert(data.message);
+                window.location.href = "/";
+            } else if (data.type === 'error') {
+                alert(data.message);
+            }
+        };
+
+        socket.onclose = function(e) {
+            console.log("WebSocket closed. Attempting reconnect...");
+            if (reconnectAttempts < 5) {
+                reconnectAttempts++;
+                setTimeout(connectWebSocket, 2000 * reconnectAttempts);
+            } else {
+                alert("Connection lost. Please refresh the page.");
+            }
+        };
+
+        socket.onerror = function(err) {
+            console.error("WebSocket error:", err);
+            socket.close();
+        };
+    }
+
+    function updatePlayerList(players) {
+        const playerList = document.getElementById("player-list");
+        const countBadge = document.getElementById("player-count-badge");
+        const startBtn = document.getElementById("start-game-btn");
+        const hostMsg = document.getElementById("host-msg");
+
+        playerList.innerHTML = "";
+        countBadge.innerText = `${players.length} / 7`;
+
+        players.forEach(p => {
+            const row = document.createElement("div");
+            row.className = "d-flex justify-content-between align-items-center p-3 rounded-4 glass-player-item " + (p.is_online ? "online" : "offline");
+            
+            // Check status indicators
+            let statusBadge = p.is_online ? 
+                '<span class="badge bg-success-glow rounded-pill small"><i class="fa-solid fa-circle me-1 text-success"></i> Online</span>' : 
+                '<span class="badge bg-danger-glow rounded-pill small"><i class="fa-regular fa-circle me-1 text-danger"></i> Offline</span>';
+
+            let hostBadge = p.is_host ? '<span class="badge bg-warning text-dark ms-2"><i class="fa-solid fa-crown me-1"></i> Host</span>' : '';
+            
+            let removeBtn = "";
+            if (isHost && !p.is_host) {
+                removeBtn = `<button class="btn btn-link text-danger p-0 border-0" onclick="removePlayer('${p.id}')" title="Kick Player"><i class="fa-solid fa-user-minus"></i></button>`;
+            }
+
+            row.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <span class="player-avatar-circle me-3">${p.name.charAt(0).toUpperCase()}</span>
+                    <span class="text-white fw-medium fs-5">${p.name} ${hostBadge}</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    ${statusBadge}
+                    ${removeBtn}
+                </div>
+            `;
+            playerList.appendChild(row);
+        });
+
+        // Host controls
+        if (isHost && startBtn) {
+            if (players.length >= 2) {
+                startBtn.classList.remove("disabled");
+                if (hostMsg) hostMsg.innerText = "Ready to start the game!";
+            } else {
+                startBtn.classList.add("disabled");
+                if (hostMsg) hostMsg.innerText = "Need at least 2 players to start.";
+            }
+        }
+    }
+
+    function startGame() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(jsonStr({ action: "start_game" }));
+        }
+    }
+
+    function removePlayer(playerId) {
+        if (confirm("Are you sure you want to remove this player?")) {
+            socket.send(jsonStr({ action: "remove_player", player_id: playerId }));
+        }
+    }
+
+    function jsonStr(obj) {
+        return JSON.stringify(obj);
+    }
+
+    // Connect on load
+    window.onload = function() {
+        connectWebSocket();
+    };
+</script>
+{% endblock %}

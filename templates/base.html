@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RabbitHouse Multiplayer</title>
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Glassmorphism Styles -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark glass-nav py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-3 text-glow" href="{% url 'index' %}">
+                <i class="fa-solid fa-dice-six me-2 text-warning animate-bounce"></i>RabbitHouse Room
+            </a>
+            
+            {% if request.session.player_name %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link text-white me-3" href="{% url 'profile' %}">
+                            <i class="fa-regular fa-circle-user me-1 text-info"></i> {{ request.session.player_name }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-danger btn-sm rounded-pill" href="#" onclick="logoutSession()">
+                            <i class="fa-solid fa-right-from-bracket me-1"></i> Exit Session
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow-1 d-flex align-items-center py-5">
+        <div class="container">
+            <!-- Messages Banner -->
+            {% if messages %}
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-8 col-lg-6">
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} glass-alert alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-3 text-white-50 mt-auto">
+        <div class="container">
+            <p class="mb-0 small">&copy; 2026 RabbitHouse Room. Crafted with Glassmorphism & WebSockets.</p>
+        </div>
+    </footer>
+
+    <!-- Web Audio API Sound Synthesizer Helper -->
+    <script>
+        const AudioSynth = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playTick() {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.1);
+            },
+            playSuccess() {
+                this.init();
+                const now = this.ctx.currentTime;
+                // Double chime (perfect fifth)
+                this.playTone(523.25, 0.15, now);     // C5
+                this.playTone(783.99, 0.3, now + 0.1);  // G5
+            },
+            playError() {
+                this.init();
+                const now = this.ctx.currentTime;
+                // Buzzer tone
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                osc.start();
+                osc.stop(now + 0.4);
+            },
+            playTone(freq, duration, time) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.frequency.setValueAtTime(freq, time);
+                gain.gain.setValueAtTime(0.1, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                osc.start(time);
+                osc.stop(time + duration);
+            }
+        };
+
+        function logoutSession() {
+            if (confirm("Are you sure you want to end your session? This will wipe your history.")) {
+                // Clear session via simple request (we can implement clean logs or just wipe the session cookie)
+                window.location.href = "/accounts/profile/"; // redirects, or we can make a post
+            }
+        }
+    </script>
+    
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card glass-card p-4 p-md-5 text-center animate-fade-in">
+            
+            {% if step == 'welcome' %}
+                <!-- Step 1: Welcome Name Entry Screen -->
+                <div class="mb-4">
+                    <div class="logo-glow-container mb-3">
+                        <i class="fa-solid fa-gamepad fa-3x text-warning"></i>
+                    </div>
+                    <h1 class="fw-bold text-white mb-2">Welcome to RabbitHouse</h1>
+                    <p class="text-white-50">Enter your nickname to join the lobby.</p>
+                </div>
+                
+                <form action="{% url 'set_name' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <input type="text" name="name" id="player_name" class="form-control glass-input text-center fs-5 py-3" placeholder="Enter Your Name" required maxlength="30" autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-lg w-100 py-3 rounded-pill fw-bold text-uppercase tracking-wider btn-glow">
+                        Continue <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+                
+            {% elif step == 'home' %}
+                <!-- Step 2: Home Screen (Create/Join Room Options) -->
+                <div class="mb-4 text-start">
+                    <h4 class="text-white-50 mb-1">Hello,</h4>
+                    <h2 class="fw-bold text-white mb-3">{{ player_name }} 👋</h2>
+                    
+                    <!-- Stats Quick View -->
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <div class="glass-stat-card p-3 text-center">
+                                <span class="d-block text-white-50 small mb-1">Games Played</span>
+                                <span class="fs-4 fw-bold text-warning">{{ profile.games_played }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="glass-stat-card p-3 text-center">
+                                <span class="d-block text-white-50 small mb-1">Total Points</span>
+                                <span class="fs-4 fw-bold text-info">{{ profile.total_points }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex flex-column gap-3">
+                    <!-- Create Game -->
+                    <form action="{% url 'create_room' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-lg w-100 py-3 rounded-pill fw-bold text-uppercase tracking-wider btn-glow">
+                            <i class="fa-solid fa-plus-circle me-2"></i> Create Game
+                        </button>
+                    </form>
+                    
+                    <div class="divider text-white-50 my-2"><span>OR</span></div>
+                    
+                    <!-- Join Game Form -->
+                    <form action="{% url 'join_room' %}" method="POST" class="text-start">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="text" name="room_id" id="join_room_id" class="form-control glass-input text-center fs-5 py-3" placeholder="Enter 6-Digit Room ID" required maxlength="6" pattern="\d{6}">
+                            <button type="submit" class="btn btn-info px-4 fw-bold text-white btn-glow-blue" style="border-radius: 0 50px 50px 0;">
+                                Join <i class="fa-solid fa-arrow-right-to-bracket ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Profile Stats Page Link -->
+                    <a href="{% url 'profile' %}" class="btn btn-outline-light rounded-pill py-2 mt-2">
+                        <i class="fa-regular fa-chart-bar me-1"></i> View Stats & Achievements
+                    </a>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,324 @@
+/* General Body Reset & Gradient Theme */
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #09070f 0%, #120e24 40%, #1e133a 100%);
+    background-attachment: fixed;
+    color: #f1f1f1;
+    min-height: 100vh;
+}
+
+/* Glassmorphism Styles */
+.glass-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 24px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-nav {
+    background: rgba(255, 255, 255, 0.01);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    color: #fff !important;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #ffc107;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.2);
+}
+
+.glass-stat-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.glass-player-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.glass-player-item.online {
+    border-left: 4px solid #198754;
+}
+
+.glass-player-item.offline {
+    border-left: 4px solid #dc3545;
+    opacity: 0.6;
+}
+
+/* Glowing text & Buttons */
+.text-glow {
+    text-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+}
+
+.btn-glow {
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-glow:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.5);
+}
+
+.btn-glow-blue {
+    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-glow-blue:hover:not(:disabled) {
+    box-shadow: 0 8px 25px rgba(13, 202, 240, 0.5);
+}
+
+/* Divider styling */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.divider:not(:empty)::after {
+    margin-left: .5em;
+}
+
+/* Avatar details */
+.player-avatar-circle {
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0dcaf0, #0d6efd);
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    line-height: 44px;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 10px rgba(13, 202, 240, 0.2);
+}
+
+/* Called Numbers Board Grid */
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+}
+
+.board-cell {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.board-cell.called {
+    background: linear-gradient(135deg, #0dcaf0, #0a9cb9);
+    border-color: #0dcaf0;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(13, 202, 240, 0.4);
+    transform: scale(1.05);
+}
+
+/* Dynamic Responsive RabbitHouse Ticket */
+.ticket-wrapper {
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 8px;
+    overflow-x: auto;
+}
+
+.ticket-grid {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    min-width: 500px;
+}
+
+.ticket-row {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 8px;
+}
+
+.ticket-cell {
+    aspect-ratio: 1.4;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.ticket-cell.empty {
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.ticket-cell.number {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    cursor: pointer;
+}
+
+.ticket-cell.number:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Interactive Cell States */
+.ticket-cell.number.marked {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    border-color: #ffc107;
+    color: #212529;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    transform: scale(1.03);
+}
+
+.ticket-cell.number.marked.claimed-valid {
+    background: linear-gradient(135deg, #198754, #146c43) !important;
+    border-color: #198754;
+    color: #fff;
+}
+
+/* Call Number Highlight Display */
+.current-number-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #212529;
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 110px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(255, 193, 7, 0.6);
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.last-called-history {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 10px;
+    display: inline-block;
+    width: 100%;
+}
+
+/* Timer styles */
+.timer-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.timer-bar {
+    height: 100%;
+    background: #0dcaf0;
+    width: 100%;
+    transition: width 0.1s linear;
+}
+
+/* Fullscreen Winner Overlay */
+.game-overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 3, 15, 0.9);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 193, 7, 0.6); }
+    50% { transform: scale(1.05); box-shadow: 0 0 45px rgba(255, 193, 7, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 193, 7, 0.6); }
+}
+
+.animate-bounce {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-zoom-in {
+    animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Scrollbar tweaks */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
