@@ -121,3 +121,10 @@ else:
 # Session settings for guest players
 SESSION_COOKIE_AGE = 86400 * 30  # 30 days
 SESSION_SAVE_EVERY_REQUEST = True
+
+# CSRF Trusted Origins for Render hosting
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'https://housygame.onrender.com',
+]
+
